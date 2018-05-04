@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# This opens vim in order to edit the image data base 
+
+for file in "$@";do
+ f1=$(echo "${file}"|sed 's/\//\\\//g') 
+ echo $f1
+ xterm -e vim -c '/\c'$f1'' ~/Pictures/imageDB.json
+done

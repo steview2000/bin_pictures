@@ -1,0 +1,249 @@
+#!/usr/bin/python3
+
+import shutil
+import json
+import glob
+
+import sys
+
+PATH = '/home/stevie/Pictures/' # this is the path for the images
+DB_file = 'imageDB.json'
+
+tag_list = ['People','Place','Event','tag']
+
+################################### For Updating ###################################################
+# This file searches for images in the ~/Pictures folder and creates an database that will be saved
+# in a json file
+def updateDB():
+	# TODO: create some unique identifier from the exif data in order to keep track of files that
+	# just have been moved
+	# search for all image files (raw files are ignored
+
+	file_list1 = glob.glob(PATH+"**/*.jpg",recursive=True) 
+	file_list2 = glob.glob(PATH+"**/*.JPG",recursive=True) 
+	file_list3 = glob.glob(PATH+"**/*.mp4",recursive=True) 
+	file_list4 = glob.glob(PATH+"**/*.MTS",recursive=True) 
+	file_list5 = glob.glob(PATH+"**/*.MOV",recursive=True) 
+	file_list6 = glob.glob(PATH+"**/*.CR2",recursive=True) 
+	file_list = file_list1 + file_list2 + file_list3 +file_list4
+	
+	# check whether database already exists. If not create a dictionary that will later
+	# be saved in a json database 
+	try:
+		fin = open(PATH+DB_file,'r')
+		dict_list = json.load(fin)
+		fin.close()
+	except FileNotFoundError:
+		dict_list = []
+
+	place_list  = []
+	people_list = []
+	event_list  = []
+	tag_list    = []
+
+	N = len(dict_list)
+	
+	# Let's go through all images found and see, whether they have already entries
+	for filename in file_list:
+		exist_already = 0
+		for i in range(N):
+			dict_entry = dict_list[i]
+			if dict_entry['File'] == filename:
+				exist_already =1
+				break
+		if exist_already ==0:
+			dict_entry = {'File':filename,'Description':'','People':[],'Place':[],'Event':'','tag':[]}
+			jout = json.dumps(dict_entry,sort_keys=True,indent=2)
+		#print(jout)
+			dict_list.append(dict_entry)
+	
+	
+	# Lets go through the database and see, whether the image still exists
+	# If not delete the corresponding entry
+	N = len(dict_list)
+	toDelete = []
+	for i in range(N):
+		dict_entry = dict_list[i]
+		file_to_check = dict_entry['File']	
+		if not(file_to_check in file_list):	
+			toDelete.append(i)
+	
+	for i in range(len(toDelete)):
+		del dict_list[toDelete[i]]
+	
+	
+	N = len(dict_list)
+	
+	# Add people tag:
+	people_file_list = glob.glob('/home/stevie/.local/share/vimiv/Tags/People*') 
+	f_people_txt = open(PATH+'people.txt','w')
+	for people_file in people_file_list:
+		people = people_file[44:].replace('_',' ')	
+		f_people = open(people_file,'r')
+		file_in_people_list = f_people.readlines()
+		for file_in_people in file_in_people_list:
+			for i in range(N):
+				dict_entry = dict_list[i]
+				if (dict_entry['File'] == file_in_people[:-1]) and (not(people in dict_entry['People'])):
+					dict_entry['People'].append(people)
+				dict_list[i] = dict_entry
+	
+		f_people.close()
+		#print("People: "+people)
+		if not (people in people_list):
+			people_list.append(people)
+			f_people_txt.write("%s\n"%people)
+	f_people_txt.close()
+
+	# Add event tag:
+	event_file_list = glob.glob('/home/stevie/.local/share/vimiv/Tags/Events*') 
+	f_event_txt = open(PATH+'events.txt','w')
+	for event_file in event_file_list:
+		event = event_file[44:].replace('_',' ')	
+		f_event = open(event_file,'r')
+		file_in_event_list = f_event.readlines()
+		for file_in_event in file_in_event_list:
+			for i in range(N):
+				dict_entry = dict_list[i]
+				if (dict_entry['File'] == file_in_event[:-1]) and (not(event in dict_entry['Event'])):
+					dict_entry['Event'] = event
+				dict_list[i] = dict_entry
+	
+		f_event.close()
+		print("Event: "+event)
+		if not (event in event_list):
+			event_list.append(event)
+			f_event_txt.write("%s\n"%event)
+
+	f_event_txt.close()
+
+	# Add place tag:
+	f_place_txt = open(PATH+'places.txt','w')
+	place_file_list = glob.glob('/home/stevie/.local/share/vimiv/Tags/Place*') 
+	for place_file in place_file_list:
+		place = place_file[43:].replace('_',' ')	
+		f_place = open(place_file,'r')
+		file_in_place_list = f_place.readlines()
+		for file_in_place in file_in_place_list:
+			for i in range(N):
+				dict_entry = dict_list[i]
+				if (dict_entry['Place'] == file_in_place[:-1]) and (not(place in dict_entry['Place'])):
+					dict_entry['Place'].append(place)
+				dict_list[i] = dict_entry
+	
+		f_place.close()
+		print("Place: "+place)
+		if not (place in place_list):
+			place_list.append(place)
+			f_place_txt.write("%s\n"%place)
+	
+	f_place_txt.close()
+	
+	fout = open(PATH+DB_file,'w')
+	json.dump(dict_list,fout,sort_keys=True,indent=2)
+	fout.close()
+
+def searchPic(arg_list):
+	# arg_list is a list of tags that all need to be fullfilled. 
+	# the arg_list can have multiple entries like the name of people or of places
+	# multiple entries will be connected with a logical AND
+	# analyse the arg_list
+	
+	# Load the josn database with the images
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+
+	file_list_out = []
+	
+	# Go through all entries and check whether they contain all of the tags in the arg_list
+	for dict_entry in dict_entry_list:
+		found_total = 1
+		for i in range(len(arg_list)):
+			found = 0
+			for tag_entry in tag_list:
+				if tag_entry != 'Event': 
+					if arg_list[i] in dict_entry[tag_entry]:
+						found = found+1
+				else:
+					if arg_list[i] == dict_entry[tag_entry]:
+						found = found+1
+					
+			found_total = found*found_total
+		if found_total>0:
+			print(dict_entry['File'])
+
+def addRemTag(dict_ent,tagCat,tag,remadd):
+	# get list:
+	if tagCat != 'Event':
+		tag_list = dict_ent[tagCat]
+		if remadd == 1:
+			if not (tag in tag_list):
+				tag_list.append(tag)
+		elif remadd ==-1:
+			if tag in tag_list:
+				tag_list.remove(tag)
+		dict_ent[tagCat] = tag_list
+	elif tagCat == 'Event':
+		if remadd == 1:
+			dict_ent[tagCat] = tag
+		elif remadd == -1:
+			dict_ent[tagCat] = ''
+	else:
+		print("Error!")
+		print("Not tag category: "+tagCat)
+	
+	return dict_ent
+
+def changeTag(arg_list):
+	# get file list (these are the files that need to be changed)
+	file_list = []
+
+	# go through the list of arguments and write out the file names. 
+	for argument in arg_list:
+		if argument[-4] == ".":
+			file_list.append(argument)
+	
+	# Load the josn database with the images
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	i=0
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in file_list:
+			tag_change = 0 # this decides, whether the next argument will be added or removed
+			for argument in arg_list:
+				if argument[0] == "+":
+					tag_change=1
+					tag_cat = argument[1:]
+				elif argument[0] == '-':
+					tag_change=-1
+					tag_cat = argument[1:]
+				elif not (argument[-4] == "."):
+					tag = argument
+					temp_list = dict_entry[tag_cat]	
+					dict_entry_list[i] = addRemTag(dict_entry,tag_cat,tag,tag_change)
+		i+=1
+	
+	fout = open(PATH+DB_file,'w')
+	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+	fout.close()
+	
+	return 0
+
+
+####### END UPDATING ################################################################
+
+if __name__ == "__main__":
+	if sys.argv[1] == "update":
+		updateDB()	
+	elif (sys.argv[1][0] == "+") or (sys.argv[1][0] == "-"):
+		changeTag(sys.argv[1:])
+	elif sys.argv[1] == "search":
+		searchPic(sys.argv[2:])
+	else:
+		print("Error !!")
+		print("No argument given.\n ")
+		print("USAGE:\n")
+		print("\teditPicDB <option> -f <file list>\n")
+		print("")
