@@ -150,10 +150,10 @@ def searchPic(arg_list):
 					found = found+1
 				elif arg_list[i] == dict_entry[tag_entry]:
 					found = found+1
-					
 			found_total = found*found_total
 		if found_total>0:
 			print(dict_entry['File'])
+	return 1
 
 def addRemTag(dict_ent,tagCat,tag,remadd):
 	# get list:
@@ -246,12 +246,19 @@ def findemptyTag(arg_list):
 				#print(dict_entry[tag_entry])	
 				im = Image.open(dict_entry['File'])
 				im.show()
-				tag = input(tag_entry+': ')				
+				tag = input(tag_entry+': ')
 				im.close()
-				if tag=='0':
-					stopnow = 0
-					break
-				dict_entry[tag_entry].append(tag)
+				if tag_entry in ['People','Place','tag']:
+					if tag[0]=='0':
+						stopnow = 0
+						break
+					dict_entry[tag_entry].append(tag.split(","))
+				else:
+					if tag =='0':
+						stopnow = 0
+						break
+					dict_entry[tag_entry].append(tag)
+
 
 	fout = open(PATH+DB_file,'w')
 	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
@@ -277,12 +284,12 @@ def singleEdit(arg_list):
 			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
 			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
 			print('------------------------')
-			date_tag    = input('DateTime (YYY:MM:DD HH:MM:SS):')
-			descript    = input('Description: ')
-			event       = input('Event: ')
-			people_tags = input('People (comma separated): ').split(",")
-			place_tags  = input('Place (comma separated): ').split(",")
-			tag_tags    = input('tag (comma separated): ').split(",")
+			date_tag    = input('DateTime [%s]:'%dict_entry['DateTime'])
+			descript    = input('Description [%s]: '%dict_entry['Description'])
+			event       = input('Event [%s]: '%dict_entry['Event'])
+			people_tags = input('People [%s]: '%','.join(map(str,dict_entry['People']))).split(",")
+			place_tags  = input('Place [%s]: '%','.join(map(str,dict_entry['Place']))).split(",")
+			tag_tags    = input('tag [%s]: '%','.join(map(str,dict_entry['tag']))).split(",")
 			if len(descript)>1:
 				dict_entry['Description'] = descript
 			if len(event)>1:
@@ -295,6 +302,8 @@ def singleEdit(arg_list):
 					else:
 						print('DateTime not changed!')
 						print('DateTime: '+dict_entry['DateTime'] )
+				dict_entry['DateTime'] = date_tag
+
 			if len(people_tags[0])>1:
 				for people_tag in people_tags:	
 					if people_tag[0] == "-":
@@ -303,7 +312,7 @@ def singleEdit(arg_list):
 					elif (people_tag[0] == "+") and not(people_tag[1:] in dict_entry['People']):
 						dict_entry['People'].append(people_tag[1:]) 
 					else:
-						dict_entry['People'] = [people_tag]
+						dict_entry['People'].append(people_tag)
 			if len(place_tags[0])>1:
 				for place_tag in place_tags:	
 					if place_tag[0] == "-":
@@ -311,7 +320,7 @@ def singleEdit(arg_list):
 					elif (place_tag[0] == "+") and not(place_tag[1:] in dict_entry['Place']):
 						dict_entry['Place'].append(place_tag[1:]) 
 					else:
-						dict_entry['Place'] = [place_tag]
+						dict_entry['Place'].append(place_tag)
 			print(tag_tags)
 			if len(tag_tags[0])>1:
 				for tag_tag in tag_tags:	
@@ -320,7 +329,7 @@ def singleEdit(arg_list):
 					elif (tag_tag[0] == "+") and not(tag_tag[1:] in dict_entry['tag']):
 						dict_entry['tag'].append(tag_tag[1:]) 
 					else:
-						dict_entry['tag'] = [tag_tag]
+						dict_entry['tag'].append(tag_tag)
 			
 			print("\nUpdated:")
 			print("-----------------")
