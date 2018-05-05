@@ -281,7 +281,6 @@ def singleEdit(arg_list):
 			people_tags = input('People (comma separated): ').split(",")
 			place_tags  = input('Place (comma separated): ').split(",")
 			tag_tags    = input('tag (comma separated): ').split(",")
-			
 			if len(descript)>1:
 				dict_entry['Description'] = descript
 			if len(date_tag) >1:
@@ -300,8 +299,7 @@ def singleEdit(arg_list):
 					elif (people_tag[0] == "+") and not(people_tag[1:] in dict_entry['People']):
 						dict_entry['People'].append(people_tag[1:]) 
 					else:
-						dict_entry['People'] = people_tag
-			print("len %d"%len(people_tags))
+						dict_entry['People'] = [people_tag]
 			if len(place_tags[0])>1:
 				for place_tag in place_tags:	
 					if place_tag[0] == "-":
@@ -309,15 +307,16 @@ def singleEdit(arg_list):
 					elif (place_tag[0] == "+") and not(place_tag[1:] in dict_entry['Place']):
 						dict_entry['Place'].append(place_tag[1:]) 
 					else:
-						dict_entry['Place'] = place_tag
-			if len(tag_tags)>2:
+						dict_entry['Place'] = [place_tag]
+			print(tag_tags)
+			if len(tag_tags[0])>1:
 				for tag_tag in tag_tags:	
 					if tag_tag[0] == "-":
 						dict_entry['tag'].remove(tag_tag[1:]) 
 					elif (tag_tag[0] == "+") and not(tag_tag[1:] in dict_entry['tag']):
 						dict_entry['tag'].append(tag_tag[1:]) 
 					else:
-						dict_entry['tag'] = tag_tag
+						dict_entry['tag'] = [tag_tag]
 			
 			print("\nUpdated:")
 			print("-----------------")
