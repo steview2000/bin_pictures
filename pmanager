@@ -272,17 +272,21 @@ def singleEdit(arg_list):
 			print(dict_entry['File'])
 			print('DateTime:    '+dict_entry['DateTime'])
 			print('Description: '+dict_entry['Description'])
+			print('Event:       '+dict_entry['Event'])
 			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
 			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
 			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
 			print('------------------------')
 			date_tag    = input('DateTime (YYY:MM:DD HH:MM:SS):')
 			descript    = input('Description: ')
+			event       = input('Event: ')
 			people_tags = input('People (comma separated): ').split(",")
 			place_tags  = input('Place (comma separated): ').split(",")
 			tag_tags    = input('tag (comma separated): ').split(",")
 			if len(descript)>1:
 				dict_entry['Description'] = descript
+			if len(event)>1:
+				dict_entry['Event'] =event
 			if len(date_tag) >1:
 				if len(dict_entry['DateTime'])>2:
 					checkagain = input("Do you really want to change the DateTime? (yes/no): ")
@@ -322,6 +326,7 @@ def singleEdit(arg_list):
 			print("-----------------")
 			print('DateTime:    '+dict_entry['DateTime'])
 			print('Description: '+dict_entry['Description'])
+			print('Event:       '+dict_entry['Event'])
 			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
 			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
 			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
@@ -345,17 +350,30 @@ def singleShow(arg_list):
 			print(dict_entry['File'])
 			print('DateTime:    '+dict_entry['DateTime'])
 			print('Description: '+dict_entry['Description'])
+			print('Event:       '+dict_entry['Event'])
 			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
 			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
 			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
 			print('------------------------\n')
 	return 0
 
+def printArgError():
+		print("Usage:\tpmanager <option> <file list>\n")
+		print("Possible options:")
+		print("update                     - searches for new images and updates image database ")
+		print("search <tags>              - searches for images with tags")
+		print("+/-<People/Place/tag> tag  - tags of the categories People/Place/tag are added or removed ")
+		print("findempty <tag_category>   - find and displays files where no tag are given in a\
+		special category")
+		print("single                     - for convenient manipulation of a single image entry")
+		print("show <file list>           - shows the entry of a list of images for convenient manipulation of a single image entry")
 
 ####### END UPDATING ################################################################
 
 if __name__ == "__main__":
-	if sys.argv[1] == "update":
+	if len(sys.argv)<2:
+		printArgError()
+	elif sys.argv[1] == "update":
 		updateDB()	
 	elif (sys.argv[1][0] == "+") or (sys.argv[1][0] == "-"):
 		#Adds or removes tags to a certain image"
@@ -373,8 +391,4 @@ if __name__ == "__main__":
 		# Manipulates the entry of a single image"
 		singleShow(sys.argv[2:])
 	else:
-		print("Error !!")
-		print("No argument given.\n ")
-		print("USAGE:\n")
-		print("\teditPicDB <option> -f <file list>\n")
-		print("")
+		printArgError()
