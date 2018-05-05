@@ -179,21 +179,25 @@ def addRemTag(dict_ent,tagCat,tag,remadd):
 	return dict_ent
 
 def changeTag(arg_list):
-	# get file list (these are the files that need to be changed)
+	# create a file list (these are the files that need to be changed)
 	file_list = []
-
+	file_found = []
 	# go through the list of arguments and write out the file names. 
 	for argument in arg_list:
-		if argument[-4] == ".":
+		if (len(argument)>4) and (argument[-4] == "."):
 			file_list.append(argument)
+			file_found.append(0)
 	
 	# Load the josn database with the images
 	fin = open(PATH+DB_file,'r')
 	dict_entry_list = json.load(fin)
 	fin.close()
 	i=0
+
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
+			#print(dict_entry['File']+' found!')
+			file_found[file_list.index(dict_entry['File'])] = 1
 			tag_change = 0 # this decides, whether the next argument will be added or removed
 			for argument in arg_list:
 				if argument[0] == "+":
@@ -202,12 +206,16 @@ def changeTag(arg_list):
 				elif argument[0] == '-':
 					tag_change=-1
 					tag_cat = argument[1:]
-				elif not (argument[-4] == "."):
+				elif not (argument in file_list):
 					tag = argument
 					temp_list = dict_entry[tag_cat]	
 					dict_entry_list[i] = addRemTag(dict_entry,tag_cat,tag,tag_change)
+					
 		i+=1
-	
+	for i in range(len(file_list)):
+		if file_found[i] == 0:
+			print("File not found: "+file_list[i])
+
 	fout = open(PATH+DB_file,'w')
 	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
 	fout.close()
