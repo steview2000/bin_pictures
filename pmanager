@@ -33,7 +33,6 @@ def calcID(path):
 # This file searches for images in the ~/Pictures folder and creates an database that will be saved
 # in a json file
 def updateDB():
-	# TODO: create some unique identifier from the exif data in order to keep track of files that
 	# just have been moved
 	# search for all image files (raw files are ignored
 	
@@ -222,6 +221,137 @@ def changeTag(arg_list):
 	
 	return 0
 
+def findemptyTag(arg_list):
+	# Load the josn database with the images
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	i=0
+
+	tag_list = []
+
+	for entry in arg_list:
+		if not ((len(entry)>4) and (entry[-4]==".")):
+			tag_list.append(entry)
+
+	if len(tag_list) <1:
+		print('Error! - tag needs to be given as argument!')
+		sys.exit(1)
+	
+	stopnow=1
+	for dict_entry in dict_entry_list:
+		for tag_entry in tag_list:
+			if (len(dict_entry[tag_entry])<1)*stopnow:
+				print("Type \"0\" to stop!\n")
+				#print(dict_entry[tag_entry])	
+				im = Image.open(dict_entry['File'])
+				im.show()
+				tag = input(tag_entry+': ')				
+				im.close()
+				if tag=='0':
+					stopnow = 0
+					break
+				dict_entry[tag_entry].append(tag)
+
+	fout = open(PATH+DB_file,'w')
+	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+	fout.close()
+	print("Changes saved!")	
+	return 0
+
+def singleEdit(arg_list):
+	# load image database
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	# go through the files one by one and
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in arg_list:
+			print('')
+			print(dict_entry['File'])
+			print('DateTime:    '+dict_entry['DateTime'])
+			print('Description: '+dict_entry['Description'])
+			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
+			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
+			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
+			print('------------------------')
+			date_tag    = input('DateTime (YYY:MM:DD HH:MM:SS):')
+			descript    = input('Description: ')
+			people_tags = input('People (comma separated): ').split(",")
+			place_tags  = input('Place (comma separated): ').split(",")
+			tag_tags    = input('tag (comma separated): ').split(",")
+			
+			if len(descript)>1:
+				dict_entry['Description'] = descript
+			if len(date_tag) >1:
+				if len(dict_entry['DateTime'])>2:
+					checkagain = input("Do you really want to change the DateTime? (yes/no): ")
+					if checkagain=='yes':
+						dict_entry['DateTime'] = date_tag
+					else:
+						print('DateTime not changed!')
+						print('DateTime: '+dict_entry['DateTime'] )
+			if len(people_tags[0])>1:
+				for people_tag in people_tags:	
+					if people_tag[0] == "-":
+						dict_entry['People'].remove(people_tag[1:]) 
+						print('Remove '+people_tag[1:])
+					elif (people_tag[0] == "+") and not(people_tag[1:] in dict_entry['People']):
+						dict_entry['People'].append(people_tag[1:]) 
+					else:
+						dict_entry['People'] = people_tag
+			print("len %d"%len(people_tags))
+			if len(place_tags[0])>1:
+				for place_tag in place_tags:	
+					if place_tag[0] == "-":
+						dict_entry['Place'].remove(place_tag[1:]) 
+					elif (place_tag[0] == "+") and not(place_tag[1:] in dict_entry['Place']):
+						dict_entry['Place'].append(place_tag[1:]) 
+					else:
+						dict_entry['Place'] = place_tag
+			if len(tag_tags)>2:
+				for tag_tag in tag_tags:	
+					if tag_tag[0] == "-":
+						dict_entry['tag'].remove(tag_tag[1:]) 
+					elif (tag_tag[0] == "+") and not(tag_tag[1:] in dict_entry['tag']):
+						dict_entry['tag'].append(tag_tag[1:]) 
+					else:
+						dict_entry['tag'] = tag_tag
+			
+			print("\nUpdated:")
+			print("-----------------")
+			print('DateTime:    '+dict_entry['DateTime'])
+			print('Description: '+dict_entry['Description'])
+			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
+			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
+			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
+			print('------------------------\n')
+
+	fout = open(PATH+DB_file,'w')
+	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+	fout.close()
+	return 0
+
+def singleShow(arg_list):
+	# load image database
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	# go through the files one by one and
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in arg_list:
+			print('')
+			print(dict_entry['File'])
+			print('DateTime:    '+dict_entry['DateTime'])
+			print('Description: '+dict_entry['Description'])
+			print('People:      [%s]'%','.join(map(str,dict_entry['People'])))
+			print('Place:       [%s]'%','.join(map(str,dict_entry['Place'])))
+			print('tags:        [%s]'%','.join(map(str,dict_entry['tag'])))
+			print('------------------------\n')
+	return 0
+
 
 ####### END UPDATING ################################################################
 
@@ -229,9 +359,20 @@ if __name__ == "__main__":
 	if sys.argv[1] == "update":
 		updateDB()	
 	elif (sys.argv[1][0] == "+") or (sys.argv[1][0] == "-"):
+		#Adds or removes tags to a certain image"
 		changeTag(sys.argv[1:])
 	elif sys.argv[1] == "search":
+		#Searches for a certain image based on tags"
 		searchPic(sys.argv[2:])
+	elif sys.argv[1] == "findempty":
+		#finds image entries where a specific tag is empty"
+		findemptyTag(sys.argv[2:])
+	elif sys.argv[1] == 'single':
+		# Manipulates the entry of a single image"
+		singleEdit(sys.argv[2:])
+	elif sys.argv[1] == 'show':
+		# Manipulates the entry of a single image"
+		singleShow(sys.argv[2:])
 	else:
 		print("Error !!")
 		print("No argument given.\n ")
