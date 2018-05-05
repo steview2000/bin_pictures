@@ -7,7 +7,8 @@ from PIL import Image
 import sys
 import os
 
-PATH = '/home/stevie/Pictures/' # this is the path for the images
+
+PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
 DB_file = 'imageDB.json'
 
 tag_list = ['DateTime','ID','People','Place','Event','tag']
