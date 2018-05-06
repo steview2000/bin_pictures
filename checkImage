@@ -1,3 +1,19 @@
 #/bin/bash
+#feh -. -B black --draw-exif --draw-tinted -A 'pmanager show ${PWD}/%f' --action1 ';pmanager single ${PWD}/%f' --action9 'rm %f' "${array[@]/#./${PWD}}"
+#
 
-feh -. -B black --draw-exif --draw-tinted -A 'pmanager show ${PWD}/%f' --action1 ';pmanager single ${PWD}/%f' --action9 'rm %f' $1
+# search for all 
+array=($(find . -print |grep -i '.*[JPG,png,jpg,jpeg,tif,tiff,bmp]'))
+N=$((${#array[@]}))
+
+if [ ${N} -gt "200" ] ;then
+	echo "There are $N images here!"
+	echo "Shall I process all of them - this takes a while (yes/no): "
+	read decission
+	if [ $decission = "yes" ];then
+		feh -. -B black --draw-exif --draw-tinted -A 'pmanager show ${PWD}/%f' --action1 ';pmanager single ${PWD}/%f' --action9 'rm %f' "${array[@]/#./${PWD}}"
+	fi
+	else
+		feh -. -B black --draw-exif --draw-tinted -A 'pmanager show ${PWD}/%f' --action1 ';pmanager single ${PWD}/%f' --action9 'rm %f' "${array[@]/#./${PWD}}"
+
+fi

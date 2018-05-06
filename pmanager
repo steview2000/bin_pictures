@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import subprocess
 import shutil
 import json
 import glob
@@ -28,6 +29,11 @@ def calcID(path):
 		height = 0
 	return "%dx%d-%d_%s"%(width,height,s1,os.path.basename(path))	
 
+def showImage(filename):
+	cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',filename]
+	subprocess.run(cmd )
+	#subprocess.run(['feh','-.','-b','black','--draw-exif','--draw-tinted',filename] )
+	#pro = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,preexec_fn=os.setsid)
 
 ################################### For Updating ###################################################
 # This file searches for images in the ~/Pictures folder and creates an database that will be saved
@@ -244,12 +250,14 @@ def findemptyTag(arg_list):
 			if (len(dict_entry[tag_entry])<1)*stopnow:
 				print("Type \"0\" to stop!\n")
 				#print(dict_entry[tag_entry])	
-				im = Image.open(dict_entry['File'])
-				im.show()
+				#showImage(dict_entry['File'])
+				cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
+				p=subprocess.Popen(cmd)
 				tag = input(tag_entry+': ')
+				p.kill()
+				#closeImage()
 				if len(tag)<1:
 					break
-				im.close()
 				if tag_entry in ['People','Place','tag']:
 					if tag[0]=='0':
 						stopnow = 0
