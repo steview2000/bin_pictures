@@ -386,7 +386,7 @@ if __name__ == "__main__":
 		dict_list = json.load(fin)
 		fin.close()
 		fout = open(PATH+DB_file+'_backup','w')
-		json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+		json.dump(dict_list,fout,sort_keys=True,indent=2)
 		fout.close()
 	except FileNotFoundError:
 		print('Create new database file!')
