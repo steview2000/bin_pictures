@@ -247,12 +247,15 @@ def findemptyTag(arg_list):
 				im = Image.open(dict_entry['File'])
 				im.show()
 				tag = input(tag_entry+': ')
+				if len(tag)<1:
+					break
 				im.close()
 				if tag_entry in ['People','Place','tag']:
 					if tag[0]=='0':
 						stopnow = 0
 						break
-					dict_entry[tag_entry].append(tag.split(","))
+					for addTag in tag.split(","):
+						dict_entry[tag_entry].append(addTag)
 				else:
 					if tag =='0':
 						stopnow = 0
