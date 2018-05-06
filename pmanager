@@ -380,6 +380,17 @@ def printArgError():
 ####### END UPDATING ################################################################
 
 if __name__ == "__main__":
+	# first read the dict and make a backup
+	try:
+		fin = open(PATH+DB_file,'r')
+		dict_list = json.load(fin)
+		fin.close()
+		fout = open(PATH+DB_file+'_backup','w')
+		json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+		fout.close()
+	except FileNotFoundError:
+		print('Create new database file!')
+	
 	if len(sys.argv)<2:
 		printArgError()
 	elif sys.argv[1] == "update":
