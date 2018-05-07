@@ -390,7 +390,7 @@ def printArgError():
 
 ####### END UPDATING ################################################################
 
-if __name__ == "__main__":
+def main():
 	# first read the dict and make a backup
 	try:
 		fin = open(PATH+DB_file,'r')
@@ -423,3 +423,6 @@ if __name__ == "__main__":
 		singleShow(sys.argv[2:])
 	else:
 		printArgError()
+
+if __name__ == "__main__":
+	main()

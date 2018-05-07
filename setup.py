@@ -8,7 +8,7 @@ with open('README.md', 'r') as f:
 
 setup(name='pManager',
       py_modules=['pmanager'],
-      version='0.0',
+      version='0.1',
       license='MIT',
       description='Collection of scripts for image management',
       long_description=long_description,
@@ -23,7 +23,7 @@ setup(name='pManager',
                    "Programming Language :: Python :: 3.5",
                    "Development Status :: 1 - Beta"],
 
-      install_requires=['feh', 'exiftool'],
+      #install_requires=['PIL','glob'],
 
       entry_points={
           'console_scripts': [
