@@ -248,7 +248,7 @@ def findemptyTag(arg_list):
 	for dict_entry in dict_entry_list:
 		for tag_entry in tag_list:
 			if (len(dict_entry[tag_entry])<1)*stopnow:
-				print("Type \"0\" to stop!\n")
+				print("Type \"q\" to stop!\n")
 				#print(dict_entry[tag_entry])	
 				#showImage(dict_entry['File'])
 				cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
@@ -259,7 +259,7 @@ def findemptyTag(arg_list):
 				if len(tag)<1:
 					break
 				if tag_entry in ['People','Place','tag']:
-					if tag[0]=='0':
+					if tag[0]=='q':
 						stopnow = 0
 						break
 					for addTag in tag.split(","):
