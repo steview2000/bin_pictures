@@ -34,11 +34,33 @@ This will install the main program (pManager). However, the scripts checkImage, 
 and pmanager_direct shall be placed by hand somewhere else like in a bin directory, or directly where
 they will be used.
 
+
 ## Usage
 
 ```pmanager <option> <argument> <file>```
 
-Depending on the option
+Depending on the option, you can either add arguments or not.
+
+#### Updating the database
+
+'''pmanager update'''
+
+This updates the data base. pmanager search for new or deleted files in ~/Pictures and changes the
+database accordingly. If possible date and times are taken from the exif-informations of the image.
+Data are stored in imageDB.json
+
+#### Adding or removing tags
+There are three different tag-categories:
+	- People: for the people
+	- Place:  for the locations
+	- tag:	  for all other tags
+
+Tags can be added or removed to any of these three categories like this
+'''pmanager +People Hanns Sarah John -People Julia +Place Germany file1.jpg file2.jpg'''
+
+This adds to eacho of the images file1.jpg and file2.jpg the People tag Hanns, Sarah, and John, and
+removes Julia and adds the Place-tag Germany.
+
 
 
 

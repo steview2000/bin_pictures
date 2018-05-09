@@ -50,7 +50,12 @@ def updateDB():
 	file_list4 = glob.glob(PATH+"**/*.MTS",recursive=True) 
 	file_list5 = glob.glob(PATH+"**/*.MOV",recursive=True) 
 	file_list6 = glob.glob(PATH+"**/*.CR2",recursive=True) 
-	file_list = file_list1 + file_list2 + file_list3 +file_list4
+	file_list = file_list1 + \
+				file_list2 + \
+				file_list3 + \
+				file_list4 + \
+				file_list5 +\
+				file_list6
 	
 	# check whether database already exists. If not create a dictionary that will later
 	# be saved in a json database 
@@ -67,6 +72,8 @@ def updateDB():
 	tag_list    = []
 
 	N = len(dict_list)
+	print("%d files found!"%N)
+	print("%d files already in the database!"%len(dict_list))
 	
 	# Let's go through all images found and see, whether they have already entries
 	for filename in file_list:
@@ -74,23 +81,20 @@ def updateDB():
 		exist_already = 0
 
 		# First look, whether the same path filename exists
-		for i in range(N):
-			dict_entry = dict_list[i]
+		for dict_entry in dict_list:
 			if dict_entry['File'] == filename:
 				exist_already =1
-				if not('DateTime' in dict_entry):
-					dict_entry['DateTime']=''
-				break
+				#if not('DateTime' in dict_entry):
+				#	dict_entry['DateTime']=''
+				#break
 
 		# If the same path filename was not found, check for the unique ID
 		if exist_already ==0:
-			for i in range(N):
-				dict_entry = dict_list[i]
+			for dict_entry in dict_list:
 				if dict_entry['ID'] == calcID(filename):
-					if dict_entry['File']!=filename:
-						print('File \"'+filename+'\" has been moved!')
-						print(dict_entry['File']+' --> '+filename)
-						dict_entry['File']=filename
+					print('File \"'+filename+'\" has been moved!')
+					print(dict_entry['File']+' --> '+filename)
+					dict_entry['File']=filename
 
 					exist_already =1
 					if not('DateTime' in dict_entry):
@@ -100,7 +104,7 @@ def updateDB():
 		# If also no ID was found, create a new entry
 		if exist_already ==0:
 			print("New: "+filename)
-			dict_entry = {'DateTime':'','ID':'','File':filename,'Description':'','People':[],'Place':[],'Event':'','tag':[]}
+			dict_entry = {'DateTime':'','ID':calcID(filename),'File':filename,'Description':'','People':[],'Place':[],'Event':'','tag':[]}
 			try:
 				dict_entry['DateTime'] = get_date_taken(filename)		
 			except:
@@ -122,7 +126,7 @@ def updateDB():
 			print(file_to_check)
 			toDelete.append(i)
 	
-	for i in range(len(toDelete)):
+	for i in sorted(toDelete,reverse=True):
 		del dict_list[toDelete[i]]
 	
 	
