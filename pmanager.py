@@ -7,6 +7,7 @@ import glob
 from PIL import Image
 import sys
 import os
+import hashlib
 
 
 PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
@@ -18,16 +19,11 @@ def get_date_taken(path):
     return Image.open(path)._getexif()[36867]
 
 def calcID(path):
-	# this functions generates a unique imageID
-	s1 = os.path.getsize(path)
-	try:
-		im = Image.open(path)
-		width, height = im.size
-		im.close()
-	except:
-		width  = 0
-		height = 0
-	return "%dx%d-%d_%s"%(width,height,s1,os.path.basename(path))	
+	# this functions generates a unique imageID based on the md5sum hash
+	f = open(path,'rb')
+	id_f = hashlib.md5(f.read()).hexdigest()
+	f.close()
+	return id_f
 
 def showImage(filename):
 	cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',filename]
@@ -71,27 +67,36 @@ def updateDB():
 	event_list  = []
 	tag_list    = []
 
-	N = len(dict_list)
+	N      = len(dict_list)
+	N_file = len(file_list)
+
 	print("%d files found!"%N)
-	print("%d files already in the database!"%len(dict_list))
+	print("%d files already in the database!"%N_file)
 	
 	# Let's go through all images found and see, whether they have already entries
+	change_number = 1
+	file_count=0
 	for filename in file_list:
-		#print(filename)
+		file_count +=1
+		
+		if file_count%200==0:	
+			print(("completed: %i/%i")%(file_count,N_file))
+		
 		exist_already = 0
 
 		# First look, whether the same path filename exists
 		for dict_entry in dict_list:
 			if dict_entry['File'] == filename:
 				exist_already =1
-				#if not('DateTime' in dict_entry):
-				#	dict_entry['DateTime']=''
-				#break
+				if dict_entry['ID'] == '':
+					dict_entry['ID'] = calcID(filename)
+					change_number +=1
 
 		# If the same path filename was not found, check for the unique ID
 		if exist_already ==0:
+			f_ID = calcID(filename)
 			for dict_entry in dict_list:
-				if dict_entry['ID'] == calcID(filename):
+				if dict_entry['ID'] == f_ID:
 					print('File \"'+filename+'\" has been moved!')
 					print(dict_entry['File']+' --> '+filename)
 					dict_entry['File']=filename
@@ -104,6 +109,7 @@ def updateDB():
 		# If also no ID was found, create a new entry
 		if exist_already ==0:
 			print("New: "+filename)
+			change_number +=1
 			dict_entry = {'DateTime':'','ID':calcID(filename),'File':filename,'Description':'','People':[],'Place':[],'Event':'','tag':[]}
 			try:
 				dict_entry['DateTime'] = get_date_taken(filename)		
@@ -113,7 +119,12 @@ def updateDB():
 			jout = json.dumps(dict_entry,sort_keys=True,indent=2)
 			dict_list.append(dict_entry)
 	
-	
+		if change_number%50 == 0:
+			fout = open(PATH+DB_file,'w')
+			json.dump(dict_list,fout,sort_keys=True,indent=2)
+			fout.close()
+		
+
 	# Lets go through the database and see, whether the image still exists
 	# If not delete the corresponding entry
 	N = len(dict_list)
@@ -125,9 +136,10 @@ def updateDB():
 			print("Not existing anymore: ")
 			print(file_to_check)
 			toDelete.append(i)
-	
-	for i in sorted(toDelete,reverse=True):
-		del dict_list[toDelete[i]]
+
+	N=len(toDelete)
+	for i in range(N):
+		del dict_list[toDelete[N-i-1]]
 	
 	
 	N = len(dict_list)
