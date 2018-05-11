@@ -28,7 +28,8 @@ Download the zip file or clone the git repository
 
 Enter the created directory and install the main program
 ```cd pManager
-   python setup.py install```
+   python setup.py install
+```
 
 This will install the main program (pManager). However, the scripts checkImage, kPhoto2Pmanager.py,
 and pmanager_direct shall be placed by hand somewhere else like in a bin directory, or directly where
