@@ -11,6 +11,7 @@ I have some pictures and I wanted to sort them in some way. After trying out a f
  - very nice graphical user interface
 
 However, there were a few things that I found annoying:
+
 	- Handling of videos was annoying (no thumbnails for many of them)
 	- kPhotoalbum always demanded mplayer2, while I had installed mplayer or mpv (mplayer2 was slow when I tried it), therefore there was no automatic video playing
 	- Tagging images and many operations where mouse driven and therefore quite slow
@@ -52,6 +53,7 @@ Data are stored in imageDB.json
 
 #### Adding or removing tags
 There are three different tag-categories:
+
 	- People: for the people
 	- Place:  for the locations
 	- tag:	  for all other tags
