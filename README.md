@@ -44,7 +44,7 @@ Depending on the option, you can either add arguments or not.
 
 #### Updating the database
 
-'''pmanager update'''
+```pmanager update```
 
 This updates the data base. pmanager search for new or deleted files in ~/Pictures and changes the
 database accordingly. If possible date and times are taken from the exif-informations of the image.
@@ -57,7 +57,7 @@ There are three different tag-categories:
 	- tag:	  for all other tags
 
 Tags can be added or removed to any of these three categories like this
-'''pmanager +People Hanns Sarah John -People Julia +Place Germany file1.jpg file2.jpg'''
+```pmanager +People Hanns Sarah John -People Julia +Place Germany file1.jpg file2.jpg```
 
 This adds to eacho of the images file1.jpg and file2.jpg the People tag Hanns, Sarah, and John, and
 removes Julia and adds the Place-tag Germany.
