@@ -12,10 +12,10 @@ I have some pictures and I wanted to sort them in some way. After trying out a f
 
 However, there were a few things that I found annoying:
 
-	- Handling of videos was annoying (no thumbnails for many of them)
-	- kPhotoalbum always demanded mplayer2, while I had installed mplayer or mpv (mplayer2 was slow when I tried it), therefore there was no automatic video playing
-	- Tagging images and many operations where mouse driven and therefore quite slow
-	- The image database is saved as an .xml file. I find .xml files often quite confusing
+ - Handling of videos was annoying (no thumbnails for many of them)
+ - kPhotoalbum always demanded mplayer2, while I had installed mplayer or mpv (mplayer2 was slow when I tried it), therefore there was no automatic video playing
+ - Tagging images and many operations where mouse driven and therefore quite slow
+ - The image database is saved as an .xml file. I find .xml files often quite confusing
 
 When I realised the power of feh, I decided to use feh for my image handling. I wrote the image
 information in a json-database. Now the database can easily manipulated with simple tools.
@@ -54,9 +54,9 @@ Data are stored in imageDB.json
 #### Adding or removing tags
 There are three different tag-categories:
 
-	- People: for the people
-	- Place:  for the locations
-	- tag:	  for all other tags
+ - People: for the people
+ - Place:  for the locations
+ - tag:	  for all other tags
 
 Tags can be added or removed to any of these three categories like this
 ```pmanager +People Hanns Sarah John -People Julia +Place Germany file1.jpg file2.jpg```
