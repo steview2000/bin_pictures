@@ -93,8 +93,8 @@ def updateDB():
 	N      = len(dict_list)
 	N_file = len(file_list)
 	
-	print("%d files found!"%N_file)
-	print("%d files already in the database!"%N)
+	print("%d files found!"%N)
+	print("%d files already in the database!"%N_file)
 	
 	# Let's go through all images found and see, whether they have already entries
 	change_number = 1
@@ -110,7 +110,7 @@ def updateDB():
 		# First look, whether the same path filename exists
 		for dict_entry in dict_list:
 			if dict_entry['File'] == filename:
-				exist_already = 1
+				exist_already =1
 				if dict_entry['ID'] == '':
 					dict_entry['ID'] = calcID(filename)
 					change_number +=1
@@ -122,13 +122,11 @@ def updateDB():
 			f_ID = calcID(filename)
 			for dict_entry in dict_list:
 				if dict_entry['ID'] == f_ID:
-					print('File \"'+dict_entry['File']+'\" has been moved!')
+					print('File \"'+filename+'\" has been moved!')
 					print(dict_entry['File']+' --> '+filename)
-					print('')
-					print(("completed: %i/%i")%(file_count,N_file))
 					dict_entry['File']=filename
-					if exist_already==0:
-						exist_already =1
+
+					exist_already =1
 		
 		# If also no ID was found, create a new entry
 		if exist_already ==0:
@@ -158,10 +156,6 @@ def updateDB():
 		file_to_check = dict_entry['File']	
 		if not(file_to_check in file_list):	
 			print("Not existing anymore: ")
-			print(file_to_check)
-			toDelete.append(i)
-		elif dict_entry in dict_list[i+1:]:
-			print("Duplicated Entry:")
 			print(file_to_check)
 			toDelete.append(i)
 
