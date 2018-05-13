@@ -20,26 +20,21 @@ tag_list = ['DateTime','ID','People','Place','Event','tag']
 def get_date_taken(path):
 	#print(path)
 	# first try the pure python way
-	f = open(path,'rb')
-	tags = exifread.process_file(f)
-	f.close()
-	if 'Image DateTime' in tags:
-		date1=('%s'%tags['Image DateTime'])
-	else:
-		date1=''
-	
-	if 'EXIF DateTimeDigitized' in tags:
-		date2=('%s'%tags['EXIF DateTimeDigitized']) 
-	else:
-		date2=''
-	
-	if (date1=='') and (date2!=''):
-		date1=date2
-	if date1=='':
-		p=subprocess.Popen(['./getCreateDate.sh',path],stdin=PIPE,stdout=PIPE,bufsize=1)		
-		date1=str(p.communicate()[0][:-2],'utf-8')
+	p=subprocess.Popen(['exiftool',path],stdin=PIPE,stdout=PIPE,bufsize=1)		
+	date1=str(p.communicate()[0],'utf-8')
+	exif_list=date1.split("\n")
+	for line in exif_list:
+		entry = line.split(": ")
+		tagname = entry[0].replace(" ","")
+		#print(tagname)
+		if (tagname == "ContentCreateDate") or \
+		(tagname == "Date/TimeOriginal") or \
+		(tagname == "CreateDate") or \
+		(tagname =="MediaCreateDate"):
+			dateCreate = entry[1]
+			break
 
-	return date1
+	return dateCreate
 
 def calcID(path):
 	# this functions generates a unique imageID based on the md5sum hash
