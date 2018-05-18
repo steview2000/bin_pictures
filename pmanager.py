@@ -13,8 +13,11 @@ import exifread
 
 
 PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
+
+# Database file
 DB_file = 'imageDB.json'
 
+# possible tags
 tag_list = ['DateTime','ID','People','Place','Event','tag']
 
 def get_date_taken(path):
@@ -23,6 +26,7 @@ def get_date_taken(path):
 	p=subprocess.Popen(['exiftool',path],stdin=PIPE,stdout=PIPE,bufsize=1)		
 	date1=str(p.communicate()[0],'utf-8')
 	exif_list=date1.split("\n")
+	dateCreate=''
 	for line in exif_list:
 		entry = line.split(": ")
 		tagname = entry[0].replace(" ","")
@@ -240,7 +244,6 @@ def changeTag(arg_list):
 
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
-			#print(dict_entry['File']+' found!')
 			file_found[file_list.index(dict_entry['File'])] = 1
 			tag_change = 0 # this decides, whether the next argument will be added or removed
 			for argument in arg_list:
@@ -416,6 +419,31 @@ def singleShow(arg_list):
 			print('------------------------\n')
 	return 0
 
+def dateTime(arg_list):
+	# create a file list (these are the files that need to be changed)
+	date = arg_list[0]
+	file_list = arg_list[1:]
+	
+	if len(arg_list)<2:
+		print("Date and Files are needed!!")
+		return 0
+
+	# Load the josn database with the images
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	i=0
+
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in file_list:
+			dict_entry['DateTime'] = date
+
+	fout = open(PATH+DB_file,'w')
+	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+	fout.close()
+	
+	return 0
+
 def printArgError():
 		print("Usage:\tpmanager <option> <file list>\n")
 		print("Possible options:")
@@ -460,6 +488,9 @@ def main():
 	elif sys.argv[1] == 'show':
 		# Manipulates the entry of a single image"
 		singleShow(sys.argv[2:])
+	elif sys.argv[1] == 'DateTime':
+		# Manipulates the entry of a single image"
+		dateTime(sys.argv[2:])
 	else:
 		printArgError()
 
