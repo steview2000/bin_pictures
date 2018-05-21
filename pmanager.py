@@ -323,10 +323,10 @@ def findemptyTag(arg_list):
 					for addTag in tag.split(","):
 						dict_entry[tag_entry].append(addTag)
 				else:
-					if tag =='0':
+					if tag =='q':
 						stopnow = 0
 						break
-					dict_entry[tag_entry].append(tag)
+					dict_entry[tag_entry] = tag
 
 
 	fout = open(PATH+DB_file,'w')
