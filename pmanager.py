@@ -103,7 +103,7 @@ def updateDB():
 		file_count +=1
 		
 		if file_count%200==0:	
-			print(("completed: %i/%i")%(file_count,N_file))
+			print(("completed: %i/%i")%(file_count,N_file),end='\r')
 		
 		exist_already = 0
 
@@ -285,8 +285,9 @@ def changeTag(arg_list):
 	
 	return 0
 
-def findemptyTag(arg_list):
+def findemptyTag(arg_list,listFiles = False):
 	# Load the josn database with the images
+	# if listFiles == True it only prints out the file names
 	fin = open(PATH+DB_file,'r')
 	dict_entry_list = json.load(fin)
 	fin.close()
@@ -306,28 +307,30 @@ def findemptyTag(arg_list):
 	for dict_entry in dict_entry_list:
 		for tag_entry in tag_list:
 			if (len(dict_entry[tag_entry])<1)*stopnow:
-				print("Type \"q\" to stop!\n")
-				#print(dict_entry[tag_entry])	
-				#showImage(dict_entry['File'])
-				cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
-				p=subprocess.Popen(cmd)
-				tag = input(tag_entry+': ')
-				p.kill()
-				#closeImage()
-				if len(tag)<1:
-					break
-				if tag_entry in ['People','Place','tag']:
-					if tag[0]=='q':
-						stopnow = 0
+				if listFiles == False: 
+					print("Type \"q\" to stop!\n")
+					#print(dict_entry[tag_entry])	
+					#showImage(dict_entry['File'])
+					cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
+					p=subprocess.Popen(cmd)
+					tag = input(tag_entry+': ')
+					p.kill()
+					#closeImage()
+					if len(tag)<1:
 						break
-					for addTag in tag.split(","):
-						dict_entry[tag_entry].append(addTag)
+					if tag_entry in ['People','Place','tag']:
+						if tag[0]=='q':
+							stopnow = 0
+							break
+						for addTag in tag.split(","):
+							dict_entry[tag_entry].append(addTag)
+					else:
+						if tag =='q':
+							stopnow = 0
+							break
+						dict_entry[tag_entry] = tag
 				else:
-					if tag =='q':
-						stopnow = 0
-						break
-					dict_entry[tag_entry] = tag
-
+					print(dict_entry['File'])
 
 	fout = open(PATH+DB_file,'w')
 	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
@@ -501,7 +504,7 @@ def main():
 		searchPic(sys.argv[2:])
 	elif sys.argv[1] == "findempty":
 		#finds image entries where a specific tag is empty"
-		findemptyTag(sys.argv[2:])
+		findemptyTag(sys.argv[2:],listFiles=True)
 	elif sys.argv[1] == 'single':
 		# Manipulates the entry of a single image"
 		singleEdit(sys.argv[2:])
