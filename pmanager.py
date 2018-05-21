@@ -11,6 +11,7 @@ import os
 import hashlib
 import exifread
 
+#TODO: Add the path of the whole file, when not given otherwise
 
 PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
 
@@ -151,7 +152,11 @@ def updateDB():
 	# Lets go through the database and see, whether the image still exists
 	# If not delete the corresponding entry
 	N = len(dict_list)
-	toDelete = []
+	toDelete    = []
+	miss_Place  = 0
+	miss_People = 0
+	miss_Date   = 0
+
 	for i in range(N):
 		dict_entry = dict_list[i]
 		file_to_check = dict_entry['File']	
@@ -163,6 +168,12 @@ def updateDB():
 			print("Duplicated Entry:")
 			print(file_to_check)
 			toDelete.append(i)
+		if len(dict_entry['Place'])<1:
+			miss_Place += 1
+		if len(dict_entry['People'])<1:
+			miss_People += 1
+		if len(dict_entry['DateTime'])<1:
+			miss_Date += 1
 
 	N=len(toDelete)
 	for i in range(N):
@@ -175,6 +186,11 @@ def updateDB():
 	json.dump(dict_list,fout,sort_keys=True,indent=2)
 	fout.close()
 	print('.... done!')
+
+	
+	print('\n Entries without Place-tag: %d'%miss_Place)
+	print('\n Entries without People-tag: %d'%miss_People)
+	print('\n Entries without Date-tag: %d'%miss_Date)
 
 def searchPic(arg_list):
 	# arg_list is a list of tags that all need to be fullfilled. 
@@ -433,7 +449,7 @@ def dateTime(arg_list):
 	dict_entry_list = json.load(fin)
 	fin.close()
 	i=0
-
+	print(date)
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
 			dict_entry['DateTime'] = date
@@ -443,6 +459,10 @@ def dateTime(arg_list):
 	fout.close()
 	
 	return 0
+
+def test(file_list):
+	for file_entry in file_list:
+		print(file_entry)	
 
 def printArgError():
 		print("Usage:\tpmanager <option> <file list>\n")
@@ -491,6 +511,8 @@ def main():
 	elif sys.argv[1] == 'DateTime':
 		# Manipulates the entry of a single image"
 		dateTime(sys.argv[2:])
+	elif sys.argv[1] == 'test':
+		test(sys.argv[2:])
 	else:
 		printArgError()
 
