@@ -490,6 +490,31 @@ def sortPic(file_list):
 		print(n_file_list[k])
 		#print("")
 
+def reversePic(file_list):
+	# get datelist for file_list
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	n_file_list = []
+	n_date_list = []
+
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in file_list:
+			n_file_list.append(dict_entry['File'])
+			n_date_list.append(dict_entry['DateTime'])
+
+	copy_n_date_list = n_date_list.copy()
+
+	copy_n_date_list.reverse()
+
+	for i in range(len(copy_n_date_list)):
+		k = n_date_list.index(copy_n_date_list[i])	
+		#print(k)
+		#print(copy_n_date_list[i])
+		print(n_file_list[k])
+		#print("")
+
 def test(file_list):
 	for file_entry in file_list:
 		print(file_entry)	
@@ -546,6 +571,8 @@ def main():
 		dateTime(sys.argv[2:])
 	elif sys.argv[1] == 'sort':
 		sortPic(sys.argv[2:])
+	elif sys.argv[1] == 'reverse':
+		reversePic(sys.argv[2:])
 	elif sys.argv[1] == 'test':
 		test(sys.argv[2:])
 	else:
