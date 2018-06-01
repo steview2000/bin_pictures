@@ -11,8 +11,6 @@ import os
 import hashlib
 import exifread
 
-#TODO: Add the path of the whole file, when not given otherwise
-
 PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
 
 # Database file
@@ -285,9 +283,9 @@ def changeTag(arg_list):
 	
 	return 0
 
-def findemptyTag(arg_list,listFiles = False):
+def findemptyTag(arg_list,listOutput = False):
 	# Load the josn database with the images
-	# if listFiles == True it only prints out the file names
+	# if listOutput == True it only prints out the file names
 	fin = open(PATH+DB_file,'r')
 	dict_entry_list = json.load(fin)
 	fin.close()
@@ -307,7 +305,7 @@ def findemptyTag(arg_list,listFiles = False):
 	for dict_entry in dict_entry_list:
 		for tag_entry in tag_list:
 			if (len(dict_entry[tag_entry])<1)*stopnow:
-				if listFiles == False: 
+				if listOutput == False: 
 					print("Type \"q\" to stop!\n")
 					#print(dict_entry[tag_entry])	
 					#showImage(dict_entry['File'])
@@ -330,12 +328,16 @@ def findemptyTag(arg_list,listFiles = False):
 							break
 						dict_entry[tag_entry] = tag
 				else:
-					print(dict_entry['File'])
+					try: 
+						print(dict_entry['File'])
+					except (BrokenPipeError, IOError):
+						sys.exit()
 
-	fout = open(PATH+DB_file,'w')
-	json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
-	fout.close()
-	print("Changes saved!")	
+	if listOutput == False: 
+		fout = open(PATH+DB_file,'w')
+		json.dump(dict_entry_list,fout,sort_keys=True,indent=2)
+		fout.close()
+		print("Changes saved!")	
 	return 0
 
 def singleEdit(arg_list):
@@ -463,6 +465,31 @@ def dateTime(arg_list):
 	
 	return 0
 
+def sortPic(file_list):
+	# get datelist for file_list
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	n_file_list = []
+	n_date_list = []
+
+	for dict_entry in dict_entry_list:
+		if dict_entry['File'] in file_list:
+			n_file_list.append(dict_entry['File'])
+			n_date_list.append(dict_entry['DateTime'])
+
+	copy_n_date_list = n_date_list.copy()
+
+	copy_n_date_list.sort()
+
+	for i in range(len(copy_n_date_list)):
+		k = n_date_list.index(copy_n_date_list[i])	
+		#print(k)
+		#print(copy_n_date_list[i])
+		print(n_file_list[k])
+		#print("")
+
 def test(file_list):
 	for file_entry in file_list:
 		print(file_entry)	
@@ -504,7 +531,10 @@ def main():
 		searchPic(sys.argv[2:])
 	elif sys.argv[1] == "findempty":
 		#finds image entries where a specific tag is empty"
-		findemptyTag(sys.argv[2:],listFiles=True)
+		findemptyTag(sys.argv[2:],listOutput=False)
+	elif sys.argv[1] == "listempty":
+		#finds image entries where a specific tag is empty"
+		findemptyTag(sys.argv[2:],listOutput=True)
 	elif sys.argv[1] == 'single':
 		# Manipulates the entry of a single image"
 		singleEdit(sys.argv[2:])
@@ -514,6 +544,8 @@ def main():
 	elif sys.argv[1] == 'DateTime':
 		# Manipulates the entry of a single image"
 		dateTime(sys.argv[2:])
+	elif sys.argv[1] == 'sort':
+		sortPic(sys.argv[2:])
 	elif sys.argv[1] == 'test':
 		test(sys.argv[2:])
 	else:
