@@ -22,6 +22,11 @@ tag_list = ['DateTime','ID','People','Place','Event','tag']
 def get_date_taken(path):
 	#print(path)
 	# first try the pure python way
+	if path[-3:] == 'MPG':
+		path = path[:-3]+'THM'
+	elif path[-7:] == 'CR2.jpg':
+		path = path[:-4]
+
 	p=subprocess.Popen(['exiftool',path],stdin=PIPE,stdout=PIPE,bufsize=1)		
 	date1=str(p.communicate()[0],'utf-8')
 	exif_list=date1.split("\n")
@@ -37,6 +42,38 @@ def get_date_taken(path):
 			dateCreate = entry[1]
 			break
 
+	if dateCreate=='':
+		if 'WP_20' in path:
+			k = path.find('WP_20')
+			year = path[k+3:k+7]
+			month = path[k+7:k+9]
+			day = path[k+9:k+11]
+			hour = path[k+12:k+14]
+			minut = path[k+15:k+17]
+			#print(path)
+			#print(year+':'+month+':'+day+' '+hour+':'+minut)
+			dateCreate=(year+':'+month+':'+day+' '+hour+':'+minut)
+
+		elif path[-11] == '_' and path[-23:-19] == 'IMG_':
+			k=-22
+			year = path[k+3:k+7]
+			month = path[k+7:k+9]
+			day = path[k+9:k+11]
+			hour = path[k+12:k+14]
+			minut = path[k+14:k+16]
+			sec = path[k+16:k+18]
+			dateCreate=(year+':'+month+':'+day+' '+hour+':'+minut+':'+sec)
+
+		elif path[-7] == '.' and path[-10] == '.' and path[-13]=='_':
+			k=-23
+			year = path[k:k+4]
+			month = path[k+5:k+7]
+			day = path[k+8:k+10]
+			hour = path[k+11:k+13]
+			minut = path[k+14:k+16]
+			sec = path[k+17:k+19]	
+			dateCreate=(year+':'+month+':'+day+' '+hour+':'+minut+':'+sec)
+			
 	return dateCreate
 
 def calcID(path):
@@ -67,13 +104,15 @@ def updateDB():
 	file_list4 = glob.glob(PATH+"**/*.MTS",recursive=True) 
 	file_list5 = glob.glob(PATH+"**/*.MOV",recursive=True) 
 	file_list6 = glob.glob(PATH+"**/*.CR2",recursive=True) 
+	file_list7 = glob.glob(PATH+"**/*.MPG",recursive=True) 
 	file_list = file_list1 + \
 				file_list2 + \
 				file_list3 + \
 				file_list4 + \
 				file_list5 +\
-				file_list6
-	
+				file_list6 +\
+				file_list7
+
 	# check whether database already exists. If not create a dictionary that will later
 	# be saved in a json database 
 	try:
@@ -99,6 +138,11 @@ def updateDB():
 	file_count=0
 	for filename in file_list:
 		file_count +=1
+		
+		if filename.find(" ")>-1:
+			print("Whitespaces found in: ")
+			print(filename)
+			print("")
 		
 		if file_count%200==0:	
 			print(("completed: %i/%i")%(file_count,N_file),end='\r')
@@ -486,7 +530,7 @@ def sortPic(file_list):
 	for i in range(len(copy_n_date_list)):
 		k = n_date_list.index(copy_n_date_list[i])	
 		#print(k)
-		#print(copy_n_date_list[i])
+		#print(copy_n_date_list[i]+"\t-\t"+n_file_list[k])
 		print(n_file_list[k])
 		#print("")
 
@@ -506,12 +550,13 @@ def reversePic(file_list):
 
 	copy_n_date_list = n_date_list.copy()
 
-	copy_n_date_list.reverse()
+	copy_n_date_list.sort(reverse=True)
 
 	for i in range(len(copy_n_date_list)):
 		k = n_date_list.index(copy_n_date_list[i])	
 		#print(k)
 		#print(copy_n_date_list[i])
+		#print(copy_n_date_list[i]+"\t-\t"+n_file_list[k])
 		print(n_file_list[k])
 		#print("")
 
@@ -570,9 +615,15 @@ def main():
 		# Manipulates the entry of a single image"
 		dateTime(sys.argv[2:])
 	elif sys.argv[1] == 'sort':
-		sortPic(sys.argv[2:])
+		file_list=[]
+		for line in sys.stdin:
+			file_list.append(line[:-1])
+		sortPic(file_list)
 	elif sys.argv[1] == 'reverse':
-		reversePic(sys.argv[2:])
+		file_list=[]
+		for line in sys.stdin:
+			file_list.append(line[:-1])
+		reversePic(file_list)
 	elif sys.argv[1] == 'test':
 		test(sys.argv[2:])
 	else:
