@@ -1,5 +1,7 @@
 #!/usr/bin/python3
+# TODO filter function
 
+import argparse
 import subprocess
 from subprocess import PIPE
 import shutil
@@ -9,7 +11,6 @@ from PIL import Image
 import sys
 import os
 import hashlib
-import exifread
 
 PATH = os.path.expanduser('~')+'/Pictures/' # this is the path for the images
 
@@ -294,6 +295,13 @@ def changeTag(arg_list):
 			file_list.append(argument)
 			file_found.append(0)
 	
+	# If no files are given as arguments, look at them in stdin
+	# They can be given through a pipe.
+	if len(file_list)<1:    
+		for line in sys.stdin:
+			file_list.append(line[:-1])
+			file_found.append(0)
+
 	# Load the josn database with the images
 	fin = open(PATH+DB_file,'r')
 	dict_entry_list = json.load(fin)
@@ -565,20 +573,27 @@ def test(file_list):
 		print(file_entry)	
 
 def printArgError():
-		print("Usage:\tpmanager <option> <file list>\n")
-		print("Possible options:")
-		print("update                     - searches for new images and updates image database ")
-		print("search <tags>              - searches for images with tags")
-		print("+/-<People/Place/tag> tag  - tags of the categories People/Place/tag are added or removed ")
-		print("findempty <tag_category>   - find and displays files where no tag are given in a\
-		special category")
-		print("single                     - for convenient manipulation of a single image entry")
-		print("show <file list>           - shows the entry of a list of images for convenient manipulation of a single image entry")
+		print("Usage:\tpmanager [COMMAND] [FILE LIST]\n")
+		print("Program to manage photo and video collections.")
+		print("[FILE LIST] can be given as argument or via STDIN/pipe\n")
+		print("Possible commands:")
+		print("  update                     \n    - searches for new images and updates image database \n")
+		print("  search <tags>              \n    - searches for images with tags\n")
+		print("  +/-<People/Place/tag> tag <file_list>   \n    - add or remove tags \n")
+		print("  findempty <tag_category>    \n    - find and displays files where no tag are given in a special category\n")
+		print("  listempty <tag_category>   \n    - find and displays files where no tag are given in a special category\n")
+		print("  single                     \n    - for convenient manipulation of a single image entry\n")
+		print("  show <file list>           \n    - shows the entry of a list of images for convenient manipulation of a single image entry\n")
+		print("  DateTime <file list>       \n    - helps you to create DateTime marks \n ")
+		print("  sort             \n    - takes files from pipe (stdin) and sorts them according to their datetime from oldest to newest\n")
+		print("  reverse           \n   - takes files from pipe (stdin) and sorts them according to their datetime from newest to oldest\n")
+		print("  test           \n    - shows the entry of a list of images for convenient manipulation of a single image entry\n")
+		#print("If no file list is given, pmanager expects file list in stdin")
 
 ####### END UPDATING ################################################################
 
 def main():
-	# first read the dict and make a backup
+	# first read the dict and make a backup in case something goes wrong
 	try:
 		fin = open(PATH+DB_file,'r')
 		dict_list = json.load(fin)
@@ -589,6 +604,12 @@ def main():
 	except FileNotFoundError:
 		print('Create new database file!')
 	
+	parser = argparse.ArgumentParser(prog="pmanager")
+#	parser.add_argument("update",help="Updates the image database. \
+#	Checks for new, deleted or changed files in ~/Pictures/")
+	subparser = parser.add_subparsers()
+	parser.parse_args()
+
 	if len(sys.argv)<2:
 		printArgError()
 	elif sys.argv[1] == "update":
@@ -609,20 +630,26 @@ def main():
 		# Manipulates the entry of a single image"
 		singleEdit(sys.argv[2:])
 	elif sys.argv[1] == 'show':
-		# Manipulates the entry of a single image"
+		# Shows the entry of a single image"
 		singleShow(sys.argv[2:])
 	elif sys.argv[1] == 'DateTime':
 		# Manipulates the entry of a single image"
 		dateTime(sys.argv[2:])
 	elif sys.argv[1] == 'sort':
-		file_list=[]
-		for line in sys.stdin:
-			file_list.append(line[:-1])
+		if len(sys.argv[2:])<1:
+			file_list=[]
+			for line in sys.stdin:
+				file_list.append(line[:-1])
+		else:
+			file_list = sys.argv[2:]
 		sortPic(file_list)
 	elif sys.argv[1] == 'reverse':
-		file_list=[]
-		for line in sys.stdin:
-			file_list.append(line[:-1])
+		if len(sys.argv[2:])<1:
+			file_list=[]
+			for line in sys.stdin:
+				file_list.append(line[:-1])
+		else:
+			file_list=sys.argv[2:]
 		reversePic(file_list)
 	elif sys.argv[1] == 'test':
 		test(sys.argv[2:])
