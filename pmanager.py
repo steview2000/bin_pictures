@@ -101,18 +101,22 @@ def updateDB():
 
 	file_list1 = glob.glob(PATH+"**/*.jpg",recursive=True) 
 	file_list2 = glob.glob(PATH+"**/*.JPG",recursive=True) 
-	file_list3 = glob.glob(PATH+"**/*.mp4",recursive=True) 
-	file_list4 = glob.glob(PATH+"**/*.MTS",recursive=True) 
-	file_list5 = glob.glob(PATH+"**/*.MOV",recursive=True) 
-	file_list6 = glob.glob(PATH+"**/*.CR2",recursive=True) 
-	file_list7 = glob.glob(PATH+"**/*.MPG",recursive=True) 
+	file_list3 = glob.glob(PATH+"**/*.jpeg",recursive=True) 
+	file_list4 = glob.glob(PATH+"**/*.png",recursive=True) 
+	file_list5 = glob.glob(PATH+"**/*.mp4",recursive=True) 
+	file_list6 = glob.glob(PATH+"**/*.MTS",recursive=True) 
+	file_list7 = glob.glob(PATH+"**/*.MOV",recursive=True) 
+	file_list8 = glob.glob(PATH+"**/*.CR2",recursive=True) 
+	file_list9 = glob.glob(PATH+"**/*.MPG",recursive=True) 
 	file_list = file_list1 + \
 				file_list2 + \
 				file_list3 + \
 				file_list4 + \
 				file_list5 +\
 				file_list6 +\
-				file_list7
+				file_list7 +\
+				file_list8 +\
+				file_list9
 
 	# check whether database already exists. If not create a dictionary that will later
 	# be saved in a json database 
@@ -604,11 +608,11 @@ def main():
 	except FileNotFoundError:
 		print('Create new database file!')
 	
-	parser = argparse.ArgumentParser(prog="pmanager")
+	#parser = argparse.ArgumentParser(prog="pmanager")
 #	parser.add_argument("update",help="Updates the image database. \
 #	Checks for new, deleted or changed files in ~/Pictures/")
-	subparser = parser.add_subparsers()
-	parser.parse_args()
+	#subparser = parser.add_subparsers()
+	#parser.parse_args()
 
 	if len(sys.argv)<2:
 		printArgError()
