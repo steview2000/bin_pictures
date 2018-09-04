@@ -20,6 +20,9 @@ DB_file = 'imageDB.json'
 # possible tags
 tag_list = ['DateTime','ID','People','Place','Event','tag']
 
+# Video suffix
+video_suffix = ['mp4','MP4','mov','MOV','MTS','mpg','MPG']
+
 def get_date_taken(path):
 	#print(path)
 	# first try the pure python way
@@ -85,7 +88,10 @@ def calcID(path):
 	return id_f
 
 def showImage(filename):
-	cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',filename]
+	if filename[-3:] in video_suffix:
+		cmd=['mpv','--loopp=inf',filename]
+	else:
+		cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',filename]
 	subprocess.run(cmd )
 	#subprocess.run(['feh','-.','-b','black','--draw-exif','--draw-tinted',filename] )
 	#pro = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,preexec_fn=os.setsid)
@@ -108,15 +114,8 @@ def updateDB():
 	file_list7 = glob.glob(PATH+"**/*.MOV",recursive=True) 
 	file_list8 = glob.glob(PATH+"**/*.CR2",recursive=True) 
 	file_list9 = glob.glob(PATH+"**/*.MPG",recursive=True) 
-	file_list = file_list1 + \
-				file_list2 + \
-				file_list3 + \
-				file_list4 + \
-				file_list5 +\
-				file_list6 +\
-				file_list7 +\
-				file_list8 +\
-				file_list9
+	file_list = file_list1 + file_list2 + file_list3 + file_list4 + file_list5 + file_list6 +\
+				file_list7 + file_list8 + file_list9
 
 	# check whether database already exists. If not create a dictionary that will later
 	# be saved in a json database 
@@ -178,7 +177,7 @@ def updateDB():
 						exist_already =1
 		
 		# If also no ID was found, create a new entry
-		if exist_already ==0:
+		if exist_already == 0:
 			print("New: "+filename)
 			change_number +=1
 			dict_entry = {'DateTime':'','ID':calcID(filename),'File':filename,'Description':'','People':[],'Place':[],'Event':'','tag':[]}
@@ -189,6 +188,15 @@ def updateDB():
 				print("No DateEntry")
 			jout = json.dumps(dict_entry,sort_keys=True,indent=2)
 			dict_list.append(dict_entry)
+
+			if filename[-3:] in video_suffix:
+				print("Video found!!\n")
+				print("Create Thumbnail")
+				print(filename)
+				retcode = subprocess.call(['ffmpeg','-i',filename,'-frames','1',filename+'_1.jpg'])	
+				retcode = subprocess.call(['convert',filename+'_1.jpg',PATH+'play.png.overlay','-gravity','center','-composite',filename+'.THM'])	
+				retcode = subprocess.call(['rm',filename+'_1.jpg'])	
+
 	
 		if change_number%50 == 0:
 			fout = open(PATH+DB_file,'w')
@@ -365,7 +373,11 @@ def findemptyTag(arg_list,listOutput = False):
 					print("Type \"q\" to stop!\n")
 					#print(dict_entry[tag_entry])	
 					#showImage(dict_entry['File'])
-					cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
+					filename = dict_entry['File']
+					if filename[-3:] in video_suffix:
+						cmd=['mpv','--loop=inf',dict_entry['File']]
+					else:
+						cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
 					p=subprocess.Popen(cmd)
 					tag = input(tag_entry+': ')
 					p.kill()
