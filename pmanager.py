@@ -54,8 +54,6 @@ def get_date_taken(path):
 			day = path[k+9:k+11]
 			hour = path[k+12:k+14]
 			minut = path[k+15:k+17]
-			#print(path)
-			#print(year+':'+month+':'+day+' '+hour+':'+minut)
 			dateCreate=(year+':'+month+':'+day+' '+hour+':'+minut)
 
 		elif path[-11] == '_' and path[-23:-19] == 'IMG_':
@@ -91,7 +89,7 @@ def showImage(filename):
 	if filename[-3:] in video_suffix:
 		cmd=['mpv','--loopp=inf',filename]
 	else:
-		cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',filename]
+		cmd=['sxiv',filename]
 	subprocess.run(cmd )
 	#subprocess.run(['feh','-.','-b','black','--draw-exif','--draw-tinted',filename] )
 	#pro = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,preexec_fn=os.setsid)
@@ -272,7 +270,12 @@ def searchPic(arg_list):
 					found = found+1
 			found_total = found*found_total
 		if found_total>0:
-			print(dict_entry['File'])
+			filename = dict_entry['File']
+			if filename[-3:] in video_suffix:
+				print(filename)
+				print(filename+'.THM')
+			else:		
+				print(filename)
 	return 1
 
 def addRemTag(dict_ent,tagCat,tag,remadd):
@@ -377,7 +380,7 @@ def findemptyTag(arg_list,listOutput = False):
 					if filename[-3:] in video_suffix:
 						cmd=['mpv','--loop=inf',dict_entry['File']]
 					else:
-						cmd=['feh','-.','-b','black','--draw-exif','--draw-tinted',dict_entry['File']]
+						cmd=['sxiv',dict_entry['File']]
 					p=subprocess.Popen(cmd)
 					tag = input(tag_entry+': ')
 					p.kill()
@@ -397,7 +400,12 @@ def findemptyTag(arg_list,listOutput = False):
 						dict_entry[tag_entry] = tag
 				else:
 					try: 
-						print(dict_entry['File'])
+						filename = dict_entry['File']
+						if filename[-3:] in video_suffix:
+							print(filename)
+							print(filename+'.THM')
+						else:	
+							print(filename)
 					except (BrokenPipeError, IOError):
 						sys.exit()
 
@@ -540,23 +548,19 @@ def sortPic(file_list):
 	fin.close()
 	
 	n_file_list = []
-	n_date_list = []
 
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
-			n_file_list.append(dict_entry['File'])
-			n_date_list.append(dict_entry['DateTime'])
+			n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
 
-	copy_n_date_list = n_date_list.copy()
-
-	copy_n_date_list.sort()
-
-	for i in range(len(copy_n_date_list)):
-		k = n_date_list.index(copy_n_date_list[i])	
-		#print(k)
-		#print(copy_n_date_list[i]+"\t-\t"+n_file_list[k])
-		print(n_file_list[k])
-		#print("")
+	n_file_list.sort()
+	for i in range(len(n_file_list)):
+		filename = n_file_list[i][1]
+		if filename[-3:] in video_suffix:
+			print(filename)
+			print(filename+'.THM')
+		else:	
+			print(filename)
 
 def reversePic(file_list):
 	# get datelist for file_list
@@ -569,20 +573,17 @@ def reversePic(file_list):
 
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
-			n_file_list.append(dict_entry['File'])
-			n_date_list.append(dict_entry['DateTime'])
+			n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
 
-	copy_n_date_list = n_date_list.copy()
+	n_file_list.sort(reverse=True)
 
-	copy_n_date_list.sort(reverse=True)
-
-	for i in range(len(copy_n_date_list)):
-		k = n_date_list.index(copy_n_date_list[i])	
-		#print(k)
-		#print(copy_n_date_list[i])
-		#print(copy_n_date_list[i]+"\t-\t"+n_file_list[k])
-		print(n_file_list[k])
-		#print("")
+	for i in range(len(n_file_list)):
+		filename = n_file_list[i][1]
+		if filename[-3:] in video_suffix:
+			print(filename)
+			print(filename+'.THM')
+		else:	
+			print(filename)
 
 def test(file_list):
 	for file_entry in file_list:

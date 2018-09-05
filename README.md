@@ -17,7 +17,7 @@ However, there were a few things that I found annoying:
  - Tagging images and many operations where mouse driven and therefore quite slow
  - The image database is saved as an .xml file. I find .xml files often quite confusing
 
-When I realised the power of feh, I decided to use feh for my image handling. I wrote the image
+When I realised the power of sxiv, I decided to use sxiv for my image handling. I wrote the image
 information in a json-database. Now the database can easily manipulated with simple tools.
 
 # The image database
@@ -36,13 +36,14 @@ there are following entries:
 This is the main program, which manages a json-image database (~/Pictures/imageDB.json). There, each
 
 ## Dependencies:
- - feh (https://feh.finalrewind.org/)
+ - sxiv (https://github.com/muennich/sxiv)
  - exiftool (https://sno.phy.queensu.ca/~phil/exiftool/)
+ - mpv (https://github.com/mpv-player/mpv)
 
 ## Install
 Install the dependencies first. Under debian/Ubuntu or Mint:
 
-```sudo apt-get feh exiftool```
+```sudo apt-get sxiv exiftool mpv```
 
 Download the zip file or clone the git repository
 
