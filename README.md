@@ -33,7 +33,8 @@ there are following entries:
  - tag:			Other tags
 
 # pmanager
-This is the main program, which manages a json-image database (~/Pictures/imageDB.json). There, each
+This is the main program, which manages a json-image database (~/Pictures/imageDB.json). 
+
 
 ## Dependencies:
  - sxiv (https://github.com/muennich/sxiv)
@@ -51,8 +52,9 @@ Download the zip file or clone the git repository
 
 Enter the created directory and install the main program
 
-```cd pManager
-   python setup.py install
+```
+cd pManager
+python setup.py install
 ```
 
 This will install the main program (pManager). However, the scripts checkImage, kPhoto2Pmanager.py,
