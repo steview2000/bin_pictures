@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # TODO filter function
+# File via pipe also for tagging
 
 import argparse
 import subprocess
@@ -77,6 +78,28 @@ def get_date_taken(path):
 			dateCreate=(year+':'+month+':'+day+' '+hour+':'+minut+':'+sec)
 			
 	return dateCreate
+
+def get_file_list(arg_list):
+	# This function takes care for the file list input. File lists can be given to pmanager
+	# either by arguments, or via STDIN (e.g. via a pipe from another program)
+	
+	# use stdin if it's full                                                        
+	if not sys.stdin.isatty():
+		print("not")
+		input_stream = sys.stdin
+		file_list=[]
+		for line in input_stream:
+			file_list.append(line[:-1])
+	# otherwise, read the given filename                                  
+	else:
+		file_list = arg_list[2:]
+	
+	if len(file_list)<1:
+		print("")
+		print("No image file provided!")
+		print("List of image files with full path needs to be provided")
+		print("either as arguments, or via stdin!!\n")
+	return file_list
 
 def calcID(path):
 	# this functions generates a unique imageID based on the md5sum hash
@@ -313,9 +336,16 @@ def changeTag(arg_list):
 	# If no files are given as arguments, look at them in stdin
 	# They can be given through a pipe.
 	if len(file_list)<1:    
-		for line in sys.stdin:
-			file_list.append(line[:-1])
-			file_found.append(0)
+		if not sys.stdin.isatty():
+			for line in sys.stdin:
+				file_list.append(line[:-1])
+				file_found.append(0)
+		else:
+			print("")
+			print("No image file provided!")
+			print("List of image files with full path needs to be provided")
+			print("either as arguments, or via stdin!!\n")
+			sys.exit()
 
 	# Load the josn database with the images
 	fin = open(PATH+DB_file,'r')
@@ -645,31 +675,25 @@ def main():
 		findemptyTag(sys.argv[2:],listOutput=True)
 	elif sys.argv[1] == 'single':
 		# Manipulates the entry of a single image"
-		singleEdit(sys.argv[2:])
+		file_list = get_file_list(sys.argv)
+		singleEdit(file_list)
 	elif sys.argv[1] == 'show':
 		# Shows the entry of a single image"
-		singleShow(sys.argv[2:])
+		file_list = get_file_list(sys.argv)
+		singleShow(file_list)
 	elif sys.argv[1] == 'DateTime':
 		# Manipulates the entry of a single image"
-		dateTime(sys.argv[2:])
+		file_list = get_file_list(sys.argv)
+		dateTime(file_list)
 	elif sys.argv[1] == 'sort':
-		if len(sys.argv[2:])<1:
-			file_list=[]
-			for line in sys.stdin:
-				file_list.append(line[:-1])
-		else:
-			file_list = sys.argv[2:]
+		file_list = get_file_list(sys.argv)
 		sortPic(file_list)
 	elif sys.argv[1] == 'reverse':
-		if len(sys.argv[2:])<1:
-			file_list=[]
-			for line in sys.stdin:
-				file_list.append(line[:-1])
-		else:
-			file_list=sys.argv[2:]
+		file_list = get_file_list(sys.argv)
 		reversePic(file_list)
 	elif sys.argv[1] == 'test':
-		test(sys.argv[2:])
+		file_list = get_file_list(sys.argv)
+		test(file_list)
 	else:
 		printArgError()
 
