@@ -85,7 +85,7 @@ def get_file_list(arg_list):
 	
 	# use stdin if it's full                                                        
 	if not sys.stdin.isatty():
-		print("not")
+		#print("not")
 		input_stream = sys.stdin
 		file_list=[]
 		for line in input_stream:
@@ -99,6 +99,14 @@ def get_file_list(arg_list):
 		print("No image file provided!")
 		print("List of image files with full path needs to be provided")
 		print("either as arguments, or via stdin!!\n")
+	
+	# Now, remove the video thumbnail files. 
+	for file in file_list:
+		if file[-4:] == '.THM':
+			f_short = file[:-4]
+			if f_short in file_list:
+				file_list.remove(file)
+
 	return file_list
 
 def calcID(path):
@@ -321,15 +329,23 @@ def searchPic(arg_list):
 	
 	# Go through all entries and check whether they contain any of the tags in the arg_list
 	for dict_entry in dict_entry_list:
+		# If no file_list provided via stdin or argumentlist, consider all files in the database,
+		# otheriwse onlye the entries in file_list
 		if (dict_entry['File'] in file_list_in) or (len(file_list_in)<1):
 			found_total = 0
 			for i in range(len(arg_list)):
 				found = 0
 				for tag_entry in tag_list:
-					if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
-						found = found+1
-					elif arg_list[i] == dict_entry[tag_entry]:
-						found = found+1
+					if arg_list[0] == 'NOT':
+						if (tag_entry in ['Place','People','tag']) and (arg_list[i] not in dict_entry[tag_entry]):
+							found = found+1
+						elif arg_list[i] != dict_entry[tag_entry]:
+							found = found+1
+					else:
+						if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
+							found = found+1
+						elif arg_list[i] == dict_entry[tag_entry]:
+							found = found+1
 				found_total = found+found_total
 			if found_total>0:
 				filename = dict_entry['File']
