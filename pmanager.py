@@ -268,7 +268,7 @@ def updateDB():
 	print('\n Entries without People-tag: %d'%miss_People)
 	print('\n Entries without Date-tag: %d'%miss_Date)
 
-def searchPic(arg_list):
+def searchPicOld(arg_list):
 	# arg_list is a list of tags that all need to be fullfilled. 
 	# the arg_list can have multiple entries like the name of people or of places
 	# multiple entries will be connected with a logical AND
@@ -281,7 +281,7 @@ def searchPic(arg_list):
 
 	file_list_out = []
 	
-	# Go through all entries and check whether they contain all of the tags in the arg_list
+	# Go through all entries and check whether they contain any of the tags in the arg_list
 	for dict_entry in dict_entry_list:
 		found_total = 1
 		for i in range(len(arg_list)):
@@ -299,6 +299,45 @@ def searchPic(arg_list):
 				print(filename+'.THM')
 			else:		
 				print(filename)
+	return 1
+
+def searchPic(arg_list):
+	# arg_list is a list of tags that all need to be fullfilled. 
+	# the arg_list can have multiple entries like the name of people or of places
+	# multiple entries will be connected with a logical AND
+	# analyse the arg_list
+	
+	# Load the josn database with the images
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+
+	file_list_out = []
+	file_list_in = []
+	
+	if not sys.stdin.isatty():
+		for line in sys.stdin:
+			file_list_in.append(line[:-1])
+	
+	# Go through all entries and check whether they contain any of the tags in the arg_list
+	for dict_entry in dict_entry_list:
+		if (dict_entry['File'] in file_list_in) or (len(file_list_in)<1):
+			found_total = 0
+			for i in range(len(arg_list)):
+				found = 0
+				for tag_entry in tag_list:
+					if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
+						found = found+1
+					elif arg_list[i] == dict_entry[tag_entry]:
+						found = found+1
+				found_total = found+found_total
+			if found_total>0:
+				filename = dict_entry['File']
+				if filename[-3:] in video_suffix:
+					print(filename)
+					print(filename+'.THM')
+				else:		
+					print(filename)
 	return 1
 
 def addRemTag(dict_ent,tagCat,tag,remadd):
