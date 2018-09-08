@@ -8,7 +8,7 @@ with open('README.md', 'r') as f:
 
 setup(name='pManager',
       py_modules=['pmanager'],
-      version='0.6.1',
+      version='0.6.2',
       license='MIT',
       description='Collection of scripts for image management',
       long_description=long_description,

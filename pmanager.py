@@ -79,7 +79,7 @@ def get_date_taken(path):
 			
 	return dateCreate
 
-def get_file_list(arg_list):
+def get_file_list(arg_list,complain=1):
 	# This function takes care for the file list input. File lists can be given to pmanager
 	# either by arguments, or via STDIN (e.g. via a pipe from another program)
 	
@@ -276,38 +276,6 @@ def updateDB():
 	print('\n Entries without People-tag: %d'%miss_People)
 	print('\n Entries without Date-tag: %d'%miss_Date)
 
-def searchPicOld(arg_list):
-	# arg_list is a list of tags that all need to be fullfilled. 
-	# the arg_list can have multiple entries like the name of people or of places
-	# multiple entries will be connected with a logical AND
-	# analyse the arg_list
-	
-	# Load the josn database with the images
-	fin = open(PATH+DB_file,'r')
-	dict_entry_list = json.load(fin)
-	fin.close()
-
-	file_list_out = []
-	
-	# Go through all entries and check whether they contain any of the tags in the arg_list
-	for dict_entry in dict_entry_list:
-		found_total = 1
-		for i in range(len(arg_list)):
-			found = 0
-			for tag_entry in tag_list:
-				if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
-					found = found+1
-				elif arg_list[i] == dict_entry[tag_entry]:
-					found = found+1
-			found_total = found*found_total
-		if found_total>0:
-			filename = dict_entry['File']
-			if filename[-3:] in video_suffix:
-				print(filename)
-				print(filename+'.THM')
-			else:		
-				print(filename)
-	return 1
 
 def searchPic(arg_list):
 	# arg_list is a list of tags that all need to be fullfilled. 
@@ -633,9 +601,13 @@ def sortPic(file_list):
 	fin.close()
 	
 	n_file_list = []
-
-	for dict_entry in dict_entry_list:
-		if dict_entry['File'] in file_list:
+	
+	if len(file_list)>0:
+		for dict_entry in dict_entry_list:
+			if dict_entry['File'] in file_list:
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+	else:
+		for dict_entry in dict_entry_list:
 			n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
 
 	n_file_list.sort()
@@ -654,7 +626,14 @@ def reversePic(file_list):
 	fin.close()
 	
 	n_file_list = []
-	n_date_list = []
+	
+	if len(file_list)>0:
+		for dict_entry in dict_entry_list:
+			if dict_entry['File'] in file_list:
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+	else:
+		for dict_entry in dict_entry_list:
+			n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
 
 	for dict_entry in dict_entry_list:
 		if dict_entry['File'] in file_list:
