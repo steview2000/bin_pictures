@@ -8,7 +8,6 @@ from subprocess import PIPE
 import shutil
 import json
 import glob
-from PIL import Image
 import sys
 import os
 import hashlib
@@ -369,6 +368,12 @@ def changeTag(arg_list):
 			print("List of image files with full path needs to be provided")
 			print("either as arguments, or via stdin!!\n")
 			sys.exit()
+	# Removing video thumbnails
+	for file in file_list:
+		if file[-4:] == '.THM':
+			f_short = file[:-4]
+			if f_short in file_list:
+				file_list.remove(file)
 
 	# Load the josn database with the images
 	fin = open(PATH+DB_file,'r')
