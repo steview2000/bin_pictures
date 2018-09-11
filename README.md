@@ -18,7 +18,7 @@ However, there were a few things that I found annoying:
  - The image database is saved as an .xml file. I find .xml files often quite confusing
 
 When I realised the power of sxiv, I decided to use sxiv for my image handling. I wrote the image
-information in a json-database. Now the database can easily manipulated with simple tools.
+information in a json-database. Now the database can easily be manipulated with simple tools.
 
 # The image database
 Information of the images are stored in a json database (~/Pictures/imageDB.json). For each image,
