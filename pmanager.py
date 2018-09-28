@@ -300,20 +300,16 @@ def searchPic(arg_list):
 		# otheriwse onlye the entries in file_list
 		if (dict_entry['File'] in file_list_in) or (len(file_list_in)<1):
 			found_total = 0
-			for i in range(len(arg_list)):
+			for i in range(1,len(arg_list)):
 				found = 0
 				for tag_entry in tag_list:
-					if arg_list[0] == 'NOT':
-						if (tag_entry in ['Place','People','tag']) and (arg_list[i] not in dict_entry[tag_entry]):
-							found = found+1
-						elif arg_list[i] != dict_entry[tag_entry]:
-							found = found+1
-					else:
-						if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
-							found = found+1
-						elif arg_list[i] == dict_entry[tag_entry]:
-							found = found+1
+					if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
+						found = found+1
+					elif arg_list[i] == dict_entry[tag_entry]:
+						found = found+1
 				found_total = found+found_total
+			if (arg_list[0] == 'NOT') or (arg_list[0] == 'not'):
+				found_total = 0*(found_total>0) + 1*(found_total == 0)
 			if found_total>0:
 				filename = dict_entry['File']
 				if filename[-3:] in video_suffix:
