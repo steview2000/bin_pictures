@@ -93,11 +93,16 @@ def get_file_list(arg_list,complain=1):
 	else:
 		file_list = arg_list[2:]
 	
+	# if there are no files given at all, take all files in the database
 	if len(file_list)<1:
-		print("")
-		print("No image file provided!")
-		print("List of image files with full path needs to be provided")
-		print("either as arguments, or via stdin!!\n")
+		fin = open(PATH+DB_file,'r')
+		dict_entry_list = json.load(fin)
+		fin.close()
+		
+		file_list = []
+		
+		for dict_entry in dict_entry_list:
+			file_list.append(dict_entry['File'])
 	
 	# Now, remove the video thumbnail files. 
 	for file in file_list:
@@ -300,7 +305,7 @@ def searchPic(arg_list):
 		# otheriwse onlye the entries in file_list
 		if (dict_entry['File'] in file_list_in) or (len(file_list_in)<1):
 			found_total = 0
-			for i in range(1,len(arg_list)):
+			for i in range(len(arg_list)):
 				found = 0
 				for tag_entry in tag_list:
 					if (tag_entry in ['Place','People','tag']) and (arg_list[i] in dict_entry[tag_entry]):
@@ -570,12 +575,13 @@ def singleShow(arg_list):
 			print('------------------------\n')
 	return 0
 
-def dateTime(arg_list):
+def dateTime(date,file_list):
 	# create a file list (these are the files that need to be changed)
-	date = arg_list[0]
-	file_list = arg_list[1:]
-	
-	if len(arg_list)<2:
+	#date = arg_list[0]
+	#file_list = arg_list[1:]
+
+	if (date[0]<'0' or date[0]>'9'):
+		print("\""+date+"\" not a valid date!")
 		print("Date and Files are needed!!")
 		return 0
 
@@ -583,6 +589,11 @@ def dateTime(arg_list):
 	fin = open(PATH+DB_file,'r')
 	dict_entry_list = json.load(fin)
 	fin.close()
+	if len(file_list) == len(dict_entry_list):
+		print("Do you want to change the date of all files???")
+		print("I don't think so!!")
+		return 0
+
 	i=0
 	print(date)
 	for dict_entry in dict_entry_list:
@@ -642,6 +653,59 @@ def reversePic(file_list):
 
 	n_file_list.sort(reverse=True)
 
+	for i in range(len(n_file_list)):
+		filename = n_file_list[i][1]
+		if filename[-3:] in video_suffix:
+			print(filename)
+			print(filename+'.THM')
+		else:	
+			print(filename)
+
+def after(date,file_list):
+	# only shows get datelist for file_list
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	n_file_list = []
+	
+	if (len(file_list)>0) and (len(file_list)<len(dict_entry_list)):
+		for dict_entry in dict_entry_list:
+			if (dict_entry['File'] in file_list) and (dict_entry['DateTime']>date):
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+	else:
+		for dict_entry in dict_entry_list:
+			if (dict_entry['DateTime']>date):
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+
+	n_file_list.sort()
+	for i in range(len(n_file_list)):
+		filename = n_file_list[i][1]
+		if filename[-3:] in video_suffix:
+			print(filename)
+			print(filename+'.THM')
+		else:	
+			print(filename)
+
+
+def before(date,file_list):
+	# only shows get datelist for file_list
+	fin = open(PATH+DB_file,'r')
+	dict_entry_list = json.load(fin)
+	fin.close()
+	
+	n_file_list = []
+	
+	if (len(file_list)>0) and (len(file_list)<len(dict_entry_list)):
+		for dict_entry in dict_entry_list:
+			if (dict_entry['File'] in file_list) and (dict_entry['DateTime']<date):
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+	else:
+		for dict_entry in dict_entry_list:
+			if (dict_entry['DateTime']<date):
+				n_file_list.append((dict_entry['DateTime'],dict_entry['File']))
+
+	n_file_list.sort()
 	for i in range(len(n_file_list)):
 		filename = n_file_list[i][1]
 		if filename[-3:] in video_suffix:
@@ -718,14 +782,20 @@ def main():
 		singleShow(file_list)
 	elif sys.argv[1] == 'DateTime':
 		# Manipulates the entry of a single image"
-		file_list = get_file_list(sys.argv)
-		dateTime(file_list)
+		file_list = get_file_list(sys.argv[3:])
+		dateTime(sys.argv[2],file_list)
 	elif sys.argv[1] == 'sort':
 		file_list = get_file_list(sys.argv)
 		sortPic(file_list)
 	elif sys.argv[1] == 'reverse':
 		file_list = get_file_list(sys.argv)
 		reversePic(file_list)
+	elif sys.argv[1] == 'before':
+		file_list = get_file_list(sys.argv[3:])
+		before(sys.argv[2],file_list)
+	elif sys.argv[1] == 'after':
+		file_list = get_file_list(sys.argv[3:])
+		after(sys.argv[2],file_list)
 	elif sys.argv[1] == 'test':
 		file_list = get_file_list(sys.argv)
 		test(file_list)
